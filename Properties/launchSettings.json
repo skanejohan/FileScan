@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Filter": {
+      "commandName": "Project",
+      "commandLineArgs": "\"'D:\\Github\\*.cs'.recursive().lines().containing('theseus').present('{file}: {line}')\""
+    }
+  }
+}
