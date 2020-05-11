@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using sFileName = System.String;
+using sInput = System.String;
+
 namespace ScanFiles
 {
     public class FunctionBuilder
     {
         public string Error { get; private set; }
 
-        public bool ParseInput(string code, out Func<IEnumerable<string>> filesFunction, out Func<string,IEnumerable<string>> linesFunction)
+        public bool ParseInput(string code, out Func<IEnumerable<sFileName>> filesFunction, out Func<sFileName,sInput,IEnumerable<string>> linesFunction)
         {
             Error = "";
             if (ParseFilesFunction(ref code, out filesFunction) && ParseLinesFunction(ref code, out linesFunction))
@@ -68,14 +71,14 @@ namespace ScanFiles
             return false;
         }
 
-        private bool ParseLinesFunction(ref string code, out Func<string,IEnumerable<string>> function)
+        private bool ParseLinesFunction(ref string code, out Func<sFileName, sInput, IEnumerable<string>> function)
         {
             function = null;
             var parsedSuccessfully = true;
 
             if (Parser.ParseFunction0(ref code, "lines"))
             {
-                Func<string, IEnumerable<string>> fn = EnumerateLines;
+                Func<sFileName, sInput, IEnumerable<string>> fn = (sFileName f, sInput i) => EnumerateLines(f);
 
                 do
                 {
@@ -126,9 +129,9 @@ namespace ScanFiles
             return () => fn().Where(s => s.Contains(match));
         }
 
-        private Func<string,IEnumerable<string>> AttachContainsFunctionTo(Func<string,IEnumerable<string>> fn, string match)
+        private Func<sFileName, sInput, IEnumerable<string>> AttachContainsFunctionTo(Func<sFileName, sInput, IEnumerable<string>> fn, string match)
         {
-            return input => fn(input).Where(s => s.Contains(match));
+            return (f, i) => fn(f, i).Where(s => s.Contains(match));
         }
 
         private Func<IEnumerable<string>> AttachCountFunctionTo(Func<IEnumerable<string>> fn)
@@ -141,9 +144,9 @@ namespace ScanFiles
             }
         }
 
-        private Func<string,IEnumerable<string>> AttachCountFunctionTo(Func<string,IEnumerable<string>> fn)
+        private Func<sFileName, sInput, IEnumerable<string>> AttachCountFunctionTo(Func<sFileName, sInput, IEnumerable<string>> fn)
         {
-            return s => countFn(fn(s));
+            return (f,i) => countFn(fn(f,i));
 
             IEnumerable<string> countFn(IEnumerable<string> items)
             {
@@ -151,9 +154,9 @@ namespace ScanFiles
             }
         }
 
-        private Func<string, IEnumerable<string>> AttachPresentFunctionTo(Func<string, IEnumerable<string>> fn, string pattern)
+        private Func<sFileName, sInput, IEnumerable<string>> AttachPresentFunctionTo(Func<sFileName, sInput, IEnumerable<string>> fn, string pattern)
         {
-            return input => fn(input).Select(line => pattern.Replace("{line}", line));
+            return (f,i) => fn(f,i).Select(line => pattern.Replace("{line}", line).Replace("{file}", f));
         }
     }
 }

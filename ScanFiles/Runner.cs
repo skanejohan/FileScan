@@ -5,7 +5,7 @@ namespace ScanFiles
 {
     public static class Runner
     {
-        public static IEnumerable<string> Run(Func<IEnumerable<string>> filesFunction, Func<string,IEnumerable<string>> linesFunction)
+        public static IEnumerable<string> Run(Func<IEnumerable<string>> filesFunction, Func<string,string,IEnumerable<string>> linesFunction)
         {
             foreach(var f in filesFunction())
             {
@@ -15,7 +15,7 @@ namespace ScanFiles
                 }
                 else
                 {
-                    foreach (var l in linesFunction(f))
+                    foreach (var l in linesFunction(f,f))
                     {
                         yield return l;
                     }

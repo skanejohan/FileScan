@@ -65,5 +65,17 @@ namespace Test
             Assert.Equal("dir1_file2_line3", result[1]);
             Assert.Equal("dir2_file2_line3", result[2]);
         }
+
+        [Fact]
+        public void VerifyPresent()
+        {
+            var builder = new TestFunctionBuilder();
+            Assert.True(builder.ParseInput("'C:'.recursive().containing('file2').lines().containing('line3').present('{file}: {line}')", out var filesFunction, out var linesFunction));
+            var result = Runner.Run(filesFunction, linesFunction).ToList();
+            Assert.Equal(3, result.Count);
+            Assert.Equal("file2: file2_line3", result[0]);
+            Assert.Equal("dir1\\file2: dir1_file2_line3", result[1]);
+            Assert.Equal("dir2\\file2: dir2_file2_line3", result[2]);
+        }
     }
 }
