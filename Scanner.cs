@@ -10,7 +10,7 @@ namespace FileScan
         private static string CurrentFile;
         private static string CurrentCount;
 
-        public static (bool,IEnumerable<string>,string) TryRun(string code)
+        public static (bool, IEnumerable<IEnumerable<string>>,string) TryRun(string code)
         {
             Func<IEnumerable<string>> filesFunction;
             var functions = new Stack<Func<IEnumerable<string>, IEnumerable<string>>>();
@@ -54,15 +54,25 @@ namespace FileScan
             return (true, Run(filesFunction, functions), "");
         }
 
-        private static IEnumerable<string> Run(Func<IEnumerable<string>> filesFunction, Stack<Func<IEnumerable<string>, IEnumerable<string>>> functions)
+        private static IEnumerable<IEnumerable<string>> Run(Func<IEnumerable<string>> filesFunction, Stack<Func<IEnumerable<string>, IEnumerable<string>>> functions)
+        {
+            foreach (var f in filesFunction())
+            {
+                CurrentFile = f;
+                yield return Run(functions);
+            }
+        }
+
+        private static IEnumerable<string> Run(Stack<Func<IEnumerable<string>, IEnumerable<string>>> functions)
         {
             if (functions.Any())
             {
                 var fun = functions.Pop();
-                return fun(Run(filesFunction, functions));
+                return fun(Run(functions));
             }
-            return filesFunction();
+            return new List<string> { CurrentFile };
         }
+
 
         private static Func<IEnumerable<string>> CreateFilesFunction(string startDir, bool recursive)
         {

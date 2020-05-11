@@ -15,9 +15,12 @@ namespace FileScan
             var (result, strings, error) = Scanner.TryRun(args[0]);
             if (result)
             {
-                foreach (var s in strings)
+                foreach (var files in strings)
                 {
-                    Console.WriteLine(s);
+                    foreach (var s in files)
+                    {
+                        Console.WriteLine(s);
+                    }
                 }
             }
             else
